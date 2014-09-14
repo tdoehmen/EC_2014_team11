@@ -2,13 +2,18 @@ import java.util.Arrays;
 
 public class Individual implements Comparable{
 
-    private double[] dna;
-    private Double fitness;
+    private double[] dna = null;
+    private double[] sigma_mutation_step_sizes = null;
+    private double[] alpha_correlation_parameters = null;
+    private Double fitness = null;
+    private int generation;
     
     public Individual(double[] dna, Double fitness) {
         super();
         this.dna = dna;
         this.fitness = fitness;
+        sigma_mutation_step_sizes = new double[dna.length];
+        alpha_correlation_parameters = new double[(dna.length*(dna.length-1))/2];
     }
     @Override
     public String toString() {
@@ -26,6 +31,28 @@ public class Individual implements Comparable{
     public void setFitness(Double fitness) {
         this.fitness = fitness;
     }
+    
+    public int getGeneration() {
+        return generation;
+    }
+    public void setGeneration(int generation) {
+        this.generation = generation;
+    }
+    
+    public double[] getSigma_mutation_step_sizes() {
+        return sigma_mutation_step_sizes;
+    }
+    
+    public void setSigma_mutation_step_sizes(double[] sigma_mutation_step_sizes) {
+        this.sigma_mutation_step_sizes = sigma_mutation_step_sizes;
+    }
+    
+    public double[] getAlpha_correlation_parameters() {
+        return alpha_correlation_parameters;
+    }
+    public void setAlpha_correlation_parameters(double[] alpha_correlation_parameters) {
+        this.alpha_correlation_parameters = alpha_correlation_parameters;
+    }
     @Override
     public int compareTo(Object arg0) {
         if( arg0 instanceof Individual ){
@@ -34,7 +61,5 @@ public class Individual implements Comparable{
         }
         return 0;
     }
-    
-    
     
 }

@@ -8,10 +8,9 @@ import org.vu.contest.ContestEvaluation;
 import org.vu.contest.ContestSubmission;
 
 public class player11 implements ContestSubmission {
-	Random rnd_;
-	ContestEvaluation evaluation_;
-	private int evaluations_limit_;
-	private ArrayList<Individual> population = new ArrayList<Individual>();
+	Random rnd;
+	ContestEvaluation evaluation;
+	private int EVALUATIONS_LIMIT;
 	private static int MAX_POPULATION_SIZE = 100;
 	private static int INITIAL_POPULATION_SIZE = 10;
 	private static int MAX_GENERATIONS = Integer.MAX_VALUE;
@@ -25,9 +24,15 @@ public class player11 implements ContestSubmission {
 	private static double SEARCH_SPACE_MAX = 5.0;
 	private static double FITNESS_MAX = 10;
 	private static boolean OVERLAPPING_GENERATIONS = true;
+	protected static double sigma_lower_boundary = 0;
+	protected Population population = null;
 
+	public static void main(String[] args){
+	    
+	}
+	
 	public player11() {
-		rnd_ = new Random();
+		rnd = new Random();
 	}
 
 	@Override
@@ -36,28 +41,28 @@ public class player11 implements ContestSubmission {
         int generations = 0;
         int evals = 0;
 
-		while(population.size() < INITIAL_POPULATION_SIZE){
+		while(population.getIndividuals().size() < INITIAL_POPULATION_SIZE){
 		    double[] randomDna = new double[10];
 		    for(int i = 0; i<10; i++){
 		        //bounds are [-5.0,5.0[
-		        randomDna[i] = rnd_.nextDouble()*10.0 - 5.0;
+		        randomDna[i] = rnd.nextDouble()*10.0 - 5.0;
 		    }
-		    Double fitness = (Double) evaluation_.evaluate(randomDna);
+		    Double fitness = (Double) evaluation.evaluate(randomDna);
 		    evals++;
             Individual individual = new Individual(randomDna,fitness);
-            population.add(individual);
+            population.getIndividuals().add(individual);
    		}
 		//----------------------------------------------------------
 		
 		//RUN EVOLUTION ON INITIAL POPULATION-----------------------
         while(generations < MAX_GENERATIONS){
             // get the elite
-            Collections.sort(population);
-            CopyOnWriteArrayList<Individual> elite = new CopyOnWriteArrayList<Individual>(population.subList((population.size()-NUMBER_OF_ELITE) < 0 ? 0 : (population.size()-NUMBER_OF_ELITE), population.size()));
+            Collections.sort(population.getIndividuals());
+            CopyOnWriteArrayList<Individual> elite = new CopyOnWriteArrayList<Individual>(population.getIndividuals().subList((population.getIndividuals().size()-NUMBER_OF_ELITE) < 0 ? 0 : (population.getIndividuals().size()-NUMBER_OF_ELITE), population.getIndividuals().size()));
             
-            //remove current population if overlapping is off
+            //remove current population.getIndividuals() if overlapping is off
             if(!OVERLAPPING_GENERATIONS){
-                population.clear();
+                population.getIndividuals().clear();
             }
             
             
@@ -66,7 +71,7 @@ public class player11 implements ContestSubmission {
                 //get a random set of elite parents
                 CopyOnWriteArrayList<Individual> parents = new CopyOnWriteArrayList<Individual>();
                 while(elite.size() > 0 && parents.size() < NUMBER_OF_PARENTS){
-                    parents.add(elite.remove(rnd_.nextInt(elite.size())));
+                    parents.add(elite.remove(rnd.nextInt(elite.size())));
                 }
                 
                 //check if number of parents was reached
@@ -79,11 +84,11 @@ public class player11 implements ContestSubmission {
                     double[] childDna = new double[10];
                     //choose dna segments randomly from parents
                     for(int j = 0; j<10; j++){
-                        double gene = parents.get(rnd_.nextInt(parents.size())).getDna()[j];
+                        double gene = parents.get(rnd.nextInt(parents.size())).getDna()[j];
                         //apply mutation to gene
-                        if( rnd_.nextDouble() < MUTATION_PROBABILITY ){
+                        if( rnd.nextDouble() < MUTATION_PROBABILITY ){
                             //apply random mutation, the mutation rate defines how much the gene is allowed to change
-                            gene = gene + (rnd_.nextDouble()*2.0-1.0)*(MUTATION_RATE*gene);
+                            gene = gene + (rnd.nextDouble()*2.0-1.0)*(MUTATION_RATE*gene);
                             if( gene < SEARCH_SPACE_MIN ){
                                 gene = SEARCH_SPACE_MIN;
                             }
@@ -94,8 +99,8 @@ public class player11 implements ContestSubmission {
                         childDna[j] = gene;
                     }
                     
-                    //calcuate fitness and add to population
-                    Double fitness = (Double) evaluation_.evaluate(childDna);
+                    //calcuate fitness and add to population.getIndividuals()
+                    Double fitness = (Double) evaluation.evaluate(childDna);
                     evals++;
                     if( fitness == null ){
                         finalMessage("Maximum evaluations were reached.");
@@ -103,20 +108,20 @@ public class player11 implements ContestSubmission {
                     }
                     Individual child = new Individual(childDna, fitness);
                     
-                    //if max population size is reached, remove unfittest individual from population
-                    if( population.size() >= MAX_POPULATION_SIZE ){
-                        Collections.sort(population);
-                        population.remove(0);
+                    //if max population.getIndividuals() size is reached, remove unfittest individual from population.getIndividuals()
+                    if( population.getIndividuals().size() >= MAX_POPULATION_SIZE ){
+                        Collections.sort(population.getIndividuals());
+                        population.getIndividuals().remove(0);
                     }
                     
                     //add child to population
-                    population.add(child);
+                    population.getIndividuals().add(child);
 
                 }
             }
             
-            Collections.sort(population);
-            System.out.println("Generation "+generations+" Result: "+population.get(population.size()-1));
+            Collections.sort(population.getIndividuals());
+            System.out.println("Generation "+generations+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
             generations ++;
             
             // Select parents
@@ -148,29 +153,36 @@ public class player11 implements ContestSubmission {
 	
 	public void finalMessage(String message){
 	    System.out.println(message);
-        Collections.sort(population);
-        System.out.println("Final best fitness was: "+population.get(population.size()-1).getFitness());
+        Collections.sort(population.getIndividuals());
+        System.out.println("Final best fitness was: "+population.getIndividuals().get(population.getIndividuals().size()-1).getFitness());
 	}
 
 	@Override
 	public void setEvaluation(ContestEvaluation evaluation) {
 		// Set evaluation problem used in the run
-		evaluation_ = evaluation;
+		this.evaluation = evaluation;
 
 		// Get evaluation properties
 		Properties props = evaluation.getProperties();
 
-        evaluations_limit_ = Integer.parseInt(props.getProperty("Evaluations"));
-		boolean isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
-		boolean hasStructure = Boolean.parseBoolean(props.getProperty("GlobalStructure"));
-		boolean isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
+        EVALUATIONS_LIMIT = Integer.parseInt(props.getProperty("Evaluations"));
+		boolean IS_MULTIMODAL = Boolean.parseBoolean(props.getProperty("Multimodal"));
+		boolean HAS_STRUCTURE = Boolean.parseBoolean(props.getProperty("GlobalStructure"));
+		boolean IS_SEPERABLE = Boolean.parseBoolean(props.getProperty("Separable"));
 
 		// Change settings(?)
-		if (isMultimodal) {
+		if (IS_MULTIMODAL) {
 			// Do sth
 		} else {
 			// Do sth else
 		}
+		
+		// Change settings(?)
+        if (IS_SEPERABLE) {
+            // Do sth
+        } else {
+            //solve using CMA Mutation
+        }
 		
 		//error
 		if(INITIAL_POPULATION_SIZE < NUMBER_OF_ELITE){
@@ -197,7 +209,11 @@ public class player11 implements ContestSubmission {
 	@Override
 	public void setSeed(long seed) {
 		// Set seed of algortihms random process
-		rnd_.setSeed(seed);
+		rnd.setSeed(seed);
 	}
+	
+	
+    
+    
 
 }
