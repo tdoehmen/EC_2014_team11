@@ -10,10 +10,12 @@ public class BiPolarBlendCrossover implements IRecombination {
     
     private Random rnd;
     private ContestEvaluation evaluation;
+    private player11 contestReference;
     
-    public BiPolarBlendCrossover(Random rnd, ContestEvaluation evaluation){
+    public BiPolarBlendCrossover(Random rnd, ContestEvaluation evaluation, player11 contestReference){
         this.rnd = rnd;
         this.evaluation = evaluation;
+        this.contestReference = contestReference;
     }
     
     @Override
@@ -45,7 +47,7 @@ public class BiPolarBlendCrossover implements IRecombination {
         }
         
         //calculate fitness
-        Double fitness = (Double) evaluation.evaluate(child_dna);
+        Double fitness = contestReference.evluateFitness(child_dna);
         //create individual
         return new Individual(child_dna, fitness);
         

@@ -10,7 +10,7 @@ public class RouletteWheelParentSelection implements IParentSelection {
         this.rnd = rnd;
     }
     @Override
-    public Individual[] selectParent(Population population) {
+    public Individual[] selectParents(Population population) {
         ArrayList<Individual> allIndividuals = population.getIndividuals();
         //TODO: select individual based on roulette wheel probability
         int indexA = (int) (rnd.nextDouble()*allIndividuals.size());

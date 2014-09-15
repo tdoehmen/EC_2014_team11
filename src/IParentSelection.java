@@ -2,5 +2,5 @@
 
 public interface IParentSelection {
 
-    public Individual[] selectParent(Population population);
+    public Individual[] selectParents(Population population);
 }

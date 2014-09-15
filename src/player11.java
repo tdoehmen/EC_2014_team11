@@ -8,24 +8,20 @@ import org.vu.contest.ContestEvaluation;
 import org.vu.contest.ContestSubmission;
 
 public class player11 implements ContestSubmission {
-	Random rnd;
-	ContestEvaluation evaluation;
-	private int EVALUATIONS_LIMIT;
-	private static int MAX_POPULATION_SIZE = 100;
-	private static int INITIAL_POPULATION_SIZE = 10;
-	private static int MAX_GENERATIONS = Integer.MAX_VALUE;
-	private static int NUMBER_OF_ELITE = 4;
-	private static int NUMBER_OF_PARENTS = 2;
-	private static int NUMBER_OF_CHILDREN = 12;
-	private static double MUTATION_RATE = 1.3;
-	private static double MUTATION_PROBABILITY = 1;
-	private static double CROSSOVER_RATE = 0.5;
-	private static double SEARCH_SPACE_MIN = -5.0;
-	private static double SEARCH_SPACE_MAX = 5.0;
-	private static double FITNESS_MAX = 10;
-	private static boolean OVERLAPPING_GENERATIONS = true;
-	protected static double sigma_lower_boundary = 0;
-	protected Population population = null;
+    
+    private static int EVALUATIONS_LIMIT;
+    private static int NUMBER_OF_PARENT_PAIRS = 30;
+    private static int NUMBER_OF_CHILDREN = 12;
+    private static IInitialPopulation initialPopulation = null;
+    private static IParentSelection parentSelection = null;
+    private static IRecombination recombination = null;
+    private static IMutation mutation = null;
+    private static ISurvivalSelection survivalSelection = null;
+    
+	private Random rnd;
+	private ContestEvaluation evaluation;
+	private Population population = null;
+	private int evals;
 
 	public static void main(String[] args){
 	    
@@ -37,92 +33,42 @@ public class player11 implements ContestSubmission {
 
 	@Override
 	public void run() {
+	      // 10 dimension functions
+        // all functions should be maximized
+        // Search space [-5,5]^10
+        // best fitness for all function is 10
+        // which population size should we choose?
+        // how many parent should make how many childs?
+        // -->Keeping balance between crossover and selection. If selection is very
+        // intense the population will converge very fast and there might not be
+        // enough time for good mixing to occur between members of the
+        // population.
+        // how many parents should we use? (just the tow bests or the 3 or 4 best (alienated evolution))
+        // parent A + parent B --> Crossover (random? 50%? Which fields?) --> Mutate (to which extend)
+        // next gen = parents + childs or just childs (overlapping EA or simple non-overlapping GA)
+        // see http://bt.pa.msu.edu/TM/BocaRaton2006/talks/poklonskiy.pdf for parameters
+        // see http://en.wikipedia.org/wiki/Test_functions_for_optimization for possible testcases
+	    
 	    //CREATE INITIAL POPULATION AND MEASURE FITNESS------------
-        int generations = 0;
-        int evals = 0;
-
-		while(population.getIndividuals().size() < INITIAL_POPULATION_SIZE){
-		    double[] randomDna = new double[10];
-		    for(int i = 0; i<10; i++){
-		        //bounds are [-5.0,5.0[
-		        randomDna[i] = rnd.nextDouble()*10.0 - 5.0;
-		    }
-		    Double fitness = (Double) evaluation.evaluate(randomDna);
-		    evals++;
-            Individual individual = new Individual(randomDna,fitness);
-            population.getIndividuals().add(individual);
-   		}
-		//----------------------------------------------------------
+        Population population = initialPopulation.createInitialPopulation();
+        //----------------------------------------------------------
+        
 		
 		//RUN EVOLUTION ON INITIAL POPULATION-----------------------
-        while(generations < MAX_GENERATIONS){
-            // get the elite
-            Collections.sort(population.getIndividuals());
-            CopyOnWriteArrayList<Individual> elite = new CopyOnWriteArrayList<Individual>(population.getIndividuals().subList((population.getIndividuals().size()-NUMBER_OF_ELITE) < 0 ? 0 : (population.getIndividuals().size()-NUMBER_OF_ELITE), population.getIndividuals().size()));
+        while(evals < EVALUATIONS_LIMIT){
             
-            //remove current population.getIndividuals() if overlapping is off
-            if(!OVERLAPPING_GENERATIONS){
-                population.getIndividuals().clear();
+            //TODO: avoid that same parent is chosen in different parent pairs?
+            for(int i = 0; i< NUMBER_OF_PARENT_PAIRS; i++){
+                Individual[] parents = parentSelection.selectParents(population);
+            
+                ArrayList<Individual> children = recombination.crossover(parents[0], parents[1], NUMBER_OF_CHILDREN);
+                population.addIndividuals(children);
             }
             
+            survivalSelection.selectSurvivals(population);
             
-            //start crossing
-            while(elite.size() > 0){
-                //get a random set of elite parents
-                CopyOnWriteArrayList<Individual> parents = new CopyOnWriteArrayList<Individual>();
-                while(elite.size() > 0 && parents.size() < NUMBER_OF_PARENTS){
-                    parents.add(elite.remove(rnd.nextInt(elite.size())));
-                }
-                
-                //check if number of parents was reached
-                if(parents.size() < NUMBER_OF_PARENTS){
-                    System.out.println("Number of parents could not be reached.");
-                }
-                
-                //create children
-                for(int i = 0; i<NUMBER_OF_CHILDREN; i++){
-                    double[] childDna = new double[10];
-                    //choose dna segments randomly from parents
-                    for(int j = 0; j<10; j++){
-                        double gene = parents.get(rnd.nextInt(parents.size())).getDna()[j];
-                        //apply mutation to gene
-                        if( rnd.nextDouble() < MUTATION_PROBABILITY ){
-                            //apply random mutation, the mutation rate defines how much the gene is allowed to change
-                            gene = gene + (rnd.nextDouble()*2.0-1.0)*(MUTATION_RATE*gene);
-                            if( gene < SEARCH_SPACE_MIN ){
-                                gene = SEARCH_SPACE_MIN;
-                            }
-                            if( gene > SEARCH_SPACE_MAX){
-                                gene = SEARCH_SPACE_MAX;
-                            }
-                        }
-                        childDna[j] = gene;
-                    }
-                    
-                    //calcuate fitness and add to population.getIndividuals()
-                    Double fitness = (Double) evaluation.evaluate(childDna);
-                    evals++;
-                    if( fitness == null ){
-                        finalMessage("Maximum evaluations were reached.");
-                        return;
-                    }
-                    Individual child = new Individual(childDna, fitness);
-                    
-                    //if max population.getIndividuals() size is reached, remove unfittest individual from population.getIndividuals()
-                    if( population.getIndividuals().size() >= MAX_POPULATION_SIZE ){
-                        Collections.sort(population.getIndividuals());
-                        population.getIndividuals().remove(0);
-                    }
-                    
-                    //add child to population
-                    population.getIndividuals().add(child);
-
-                }
-            }
-            
-            Collections.sort(population.getIndividuals());
-            System.out.println("Generation "+generations+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
-            generations ++;
+            int generation = population.increaseGeneration();
+            System.out.println("Generation "+generation+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
             
             // Select parents
             // Apply variation operators and get children
@@ -151,10 +97,22 @@ public class player11 implements ContestSubmission {
 		// Double score = (Double)evaluation_.evaluate(pred);
 	}
 	
+	public Double evluateFitness(double[] dna){
+	    Double fitness = (Double) evaluation.evaluate(dna);
+        evals++;
+        if( fitness == null ){
+            finalMessage("Maximum evaluations were reached.");
+            return 0.0;
+        }
+        
+        return fitness;
+	}
+	
 	public void finalMessage(String message){
 	    System.out.println(message);
         Collections.sort(population.getIndividuals());
         System.out.println("Final best fitness was: "+population.getIndividuals().get(population.getIndividuals().size()-1).getFitness());
+        System.exit(0);
 	}
 
 	@Override
@@ -183,27 +141,20 @@ public class player11 implements ContestSubmission {
         } else {
             //solve using CMA Mutation
         }
-		
-		//error
-		if(INITIAL_POPULATION_SIZE < NUMBER_OF_ELITE){
-		    return;
-		}
-		// 10 dimension functions
-        // all functions should be maximized
-        // Search space [-5,5]^10
-        // best fitness for all function is 10
-        // which population size should we choose?
-        // how many parent should make how many childs?
-        // -->Keeping balance between crossover and selection. If selection is very
-        // intense the population will converge very fast and there might not be
-        // enough time for good mixing to occur between members of the
-        // population.
-        // how many parents should we use? (just the tow bests or the 3 or 4 best (alienated evolution))
-        // parent A + parent B --> Crossover (random? 50%? Which fields?) --> Mutate (to which extend)
-        // next gen = parents + childs or just childs (overlapping EA or simple non-overlapping GA)
-        // see http://bt.pa.msu.edu/TM/BocaRaton2006/talks/poklonskiy.pdf for parameters
-        // see http://en.wikipedia.org/wiki/Test_functions_for_optimization for possible testcases
         
+        // Change settings(?)
+        if (HAS_STRUCTURE) {
+            // Do sth
+        } else {
+            //Do sth else
+        }
+
+        initialPopulation = new DefaultInitialPopulation(rnd, evaluation, this);
+        parentSelection = new RouletteWheelParentSelection(rnd);
+        recombination = new BiPolarBlendCrossover(rnd, evaluation, this);
+        mutation = new CorrelatedMutation(rnd);
+        survivalSelection = new FitnessAndAgeBasedSurvivalSelection();
+		
 	}
 
 	@Override
@@ -211,9 +162,5 @@ public class player11 implements ContestSubmission {
 		// Set seed of algortihms random process
 		rnd.setSeed(seed);
 	}
-	
-	
-    
-    
 
 }

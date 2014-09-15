@@ -23,6 +23,10 @@ public class Population {
         individuals.add(individual);
     }
     
+    public void addIndividuals(ArrayList<Individual> individuals){
+        individuals.addAll(individuals);
+    }
+    
     public void removeIndividual(Individual individual){
         individuals.remove(individual);
     }
@@ -31,8 +35,8 @@ public class Population {
         return generation;
     }
     
-    public void increaseGeneration(){
-        generation++;
+    public int increaseGeneration(){
+        return ++generation;
     }
     
 }
