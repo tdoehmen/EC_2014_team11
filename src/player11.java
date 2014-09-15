@@ -18,10 +18,10 @@ public class player11 implements ContestSubmission {
     private static IMutation mutation = null;
     private static ISurvivalSelection survivalSelection = null;
     
-	private Random rnd;
-	private ContestEvaluation evaluation;
-	private Population population = null;
-	private int evals;
+	public static Random rnd;
+	public static ContestEvaluation evaluation;
+	private static Population population = null;
+	private static int evals;
 
 	public static void main(String[] args){
 	    
@@ -49,74 +49,71 @@ public class player11 implements ContestSubmission {
         // see http://bt.pa.msu.edu/TM/BocaRaton2006/talks/poklonskiy.pdf for parameters
         // see http://en.wikipedia.org/wiki/Test_functions_for_optimization for possible testcases
 	    
-	    //CREATE INITIAL POPULATION AND MEASURE FITNESS------------
-        Population population = initialPopulation.createInitialPopulation();
-        //----------------------------------------------------------
-        
-		
-		//RUN EVOLUTION ON INITIAL POPULATION-----------------------
-        while(evals < EVALUATIONS_LIMIT){
-            
-            //TODO: avoid that same parent is chosen in different parent pairs?
-            ArrayList<Individual> children = new ArrayList<Individual>();
-            parentSelection.prepareSelection(population);
-            for(int i = 0; i< NUMBER_OF_PARENT_PAIRS; i++){
-                Individual[] parents = parentSelection.selectParents(population);
-            
-                ArrayList<double[]> child_dnas = recombination.crossover(parents, NUMBER_OF_CHILDREN);
-                for(double[] child_dna: child_dnas){
-                    children.add(mutation.mutate(child_dna));
-                }
-            }
-            
-            survivalSelection.selectSurvivals(population,children);
-            
-            int generation = population.increaseGeneration();
-            System.out.println("Generation "+generation+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
-            
-            // Select parents
-            // Apply variation operators and get children
-            //  double child[] = ...
-            
-            // objective function ---> the close to 10, the better
-            // Double fitness = evaluation_.evaluate(child);
-            // Select survivors
-        }
-        
-        finalMessage("Maximum number of generations was reached. Evaluations: "+evals);
+	    try{
+
+	        //CREATE INITIAL POPULATION AND MEASURE FITNESS------------
+	        population = initialPopulation.createInitialPopulation();
+	        //----------------------------------------------------------
+	        
+	        
+	        //RUN EVOLUTION ON INITIAL POPULATION-----------------------
+	        while(evals < EVALUATIONS_LIMIT){
+	            
+	            //TODO: avoid that same parent is chosen in different parent pairs?
+	            ArrayList<Individual> children = new ArrayList<Individual>();
+	            parentSelection.prepareSelection(population);
+	            for(int i = 0; i< NUMBER_OF_PARENT_PAIRS; i++){
+	                Individual[] parents = parentSelection.selectParents(population);
+	            
+	                ArrayList<double[]> child_dnas = recombination.crossover(parents, NUMBER_OF_CHILDREN);
+	                for(double[] child_dna: child_dnas){
+	                    children.add(mutation.mutate(child_dna));
+	                }
+	            }
+	            
+	            survivalSelection.selectSurvivals(population,children);
+	            
+	            int generation = population.increaseGeneration();
+	            System.out.println("Generation "+generation+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
+	            
+	            // Select parents
+	            // Apply variation operators and get children
+	            //  double child[] = ...
+	            
+	            // objective function ---> the close to 10, the better
+	            // Double fitness = evaluation_.evaluate(child);
+	            // Select survivors
+	        }
+	        
+	        //------------------------------------------------------------
+	        
+	        // Run your algorithm here
+
+	        // Getting data from evaluation problem (depends on the specific
+	        // evaluation implementation)
+	        // E.g. getting a vector of numbers
+	        // Vector<Double> data =
+	        // (Vector<Doulbe>)evaluation_.getData("trainingset1");
+
+	        // Evaluating your results
+	        // E.g. evaluating a series of true/false predictions
+	        // boolean pred[] = ...
+	        // Double score = (Double)evaluation_.evaluate(pred);
+	    }catch(RuntimeException e){
+	        System.out.println(e.getMessage());
+	    }
+	    
         return;
-        //------------------------------------------------------------
-        
-		// Run your algorithm here
-
-		// Getting data from evaluation problem (depends on the specific
-		// evaluation implementation)
-		// E.g. getting a vector of numbers
-		// Vector<Double> data =
-		// (Vector<Doulbe>)evaluation_.getData("trainingset1");
-
-		// Evaluating your results
-		// E.g. evaluating a series of true/false predictions
-		// boolean pred[] = ...
-		// Double score = (Double)evaluation_.evaluate(pred);
 	}
 	
-	public Individual createIndividual(double[] dna){
+	public static Individual createIndividual(double[] dna){
 	    Double fitness = (Double) evaluation.evaluate(dna);
         evals++;
         if( fitness == null ){
-            finalMessage("Maximum evaluations were reached.");
-            return null;
+            throw new RuntimeException("Maximum evaluations were reached.");
         }
         
         return new Individual(dna, fitness, population.getGeneration()+1);
-	}
-	
-	public void finalMessage(String message){
-	    System.out.println(message);
-        Collections.sort(population.getIndividuals());
-        System.out.println("Final best fitness was: "+population.getIndividuals().get(population.getIndividuals().size()-1).getFitness());
-        System.exit(0);
 	}
 
 	@Override
@@ -153,10 +150,10 @@ public class player11 implements ContestSubmission {
             //Do sth else
         }
 
-        initialPopulation = new DefaultInitialPopulation(rnd, this);
-        parentSelection = new RouletteWheelParentSelection(rnd);
-        recombination = new BiPolarBlendCrossover(rnd, this);
-        mutation = new UncorrelatedMutation(rnd, this);
+        initialPopulation = new DefaultInitialPopulation();
+        parentSelection = new RouletteWheelParentSelection();
+        recombination = new BiPolarBlendCrossover();
+        mutation = new UncorrelatedMutation();
         survivalSelection = new FitnessAndAgeBasedSurvivalSelection();
 		
 	}

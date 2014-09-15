@@ -8,14 +8,6 @@ public class BiPolarBlendCrossover implements IRecombination {
 
     public static double APLPHA_CROSS_RATE = 0.5;
     
-    private Random rnd;
-    private player11 contestReference;
-    
-    public BiPolarBlendCrossover(Random rnd, player11 contestReference){
-        this.rnd = rnd;
-        this.contestReference = contestReference;
-    }
-    
     @Override
     public ArrayList<double[]> crossover(Individual[] parent, int number_of_childs) {
         if(parent.length != 2){
@@ -44,7 +36,7 @@ public class BiPolarBlendCrossover implements IRecombination {
         for(int j = 0; j<10; j++){
             double di_delta = parentOne.getDna()[j]-parentTwo.getDna()[j];
             if(di_delta > 0){
-                child_dna[j] = parentOne.getDna()[j]+(rnd.nextDouble()*(2.0*di_delta)-(di_delta));
+                child_dna[j] = parentOne.getDna()[j]+(player11.rnd.nextDouble()*(2.0*di_delta)-(di_delta));
             }else{
                 child_dna[j] = parentTwo.getDna()[j];
             }

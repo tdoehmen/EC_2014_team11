@@ -5,12 +5,7 @@ import java.util.Random;
 public class RouletteWheelParentSelection implements IParentSelection {
 
     public static int NUMBER_OF_PARENTS = 2;
-    private Random rnd;
     private ArrayList<Double> probabilityList;
-    
-    public RouletteWheelParentSelection(Random rnd){
-        this.rnd = rnd;
-    }
     
     @Override
     public Individual[] selectParents(Population population) {
@@ -18,7 +13,7 @@ public class RouletteWheelParentSelection implements IParentSelection {
         
         Individual[] parents = new Individual[NUMBER_OF_PARENTS];
         for( int j = 0; j< NUMBER_OF_PARENTS; j++){
-            Double random = rnd.nextDouble();
+            Double random = player11.rnd.nextDouble();
             for(int i = 0; i<probabilityList.size(); i++){
                 if( probabilityList.get(i) > random ){
                     // found parent in range e.g if random=0.2 -> [0.1][0.15][x][0.32]..[1]

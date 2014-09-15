@@ -12,13 +12,6 @@ public class CMAMutation implements IMutation {
     public static double SIGMA_LOWER_BOUNDARY = 0.0;
 
     private Individual individual = null;
-    private Random rnd = null;
-    private player11 contestReference;
-    
-    private CMAMutation(Random rnd, player11 contestReference){
-        this.rnd = rnd;
-        this.contestReference = contestReference;
-    }
 
     @Override
     /**
@@ -28,7 +21,7 @@ public class CMAMutation implements IMutation {
         this.individual = individual;
         // TODO Auto-generated method stub
         //see ch04.pdf, p. 25
-        return contestReference.createIndividual(dna);
+        return player11.createIndividual(dna);
     }
     
     public double calculate_c_covarianceValue(int i_index, int j_index){
@@ -57,8 +50,8 @@ public class CMAMutation implements IMutation {
 
     public double calculateSigmaMutationStepSize(double previous_sigma_mutation_step_size){
         //see ch04.pdf, p.22
-        return previous_sigma_mutation_step_size*Math.exp(calculateTauApostropheOverallLearningRate()*rnd.nextGaussian()+
-                calculateTauCoordinateWiseLearningRate()*rnd.nextGaussian());
+        return previous_sigma_mutation_step_size*Math.exp(calculateTauApostropheOverallLearningRate()*player11.rnd.nextGaussian()+
+                calculateTauCoordinateWiseLearningRate()*player11.rnd.nextGaussian());
     }
 
     public double calculateTauApostropheOverallLearningRate(){
