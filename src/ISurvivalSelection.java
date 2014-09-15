@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 
 
 public interface ISurvivalSelection {
@@ -7,6 +9,6 @@ public interface ISurvivalSelection {
      * 
      * @param unselectedPopulation
      */
-    public void selectSurvivals(Population unselectedPopulation);
+    public void selectSurvivals(Population unselectedPopulation, ArrayList<Individual> children);
     
 }

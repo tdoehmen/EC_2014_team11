@@ -6,5 +6,5 @@ public interface IMutation {
      * 
      * @return
      */
-    public Individual mutate(Individual individual);
+    public Individual mutate(double[] dna);
 }

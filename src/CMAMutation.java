@@ -13,20 +13,22 @@ public class CMAMutation implements IMutation {
 
     private Individual individual = null;
     private Random rnd = null;
+    private player11 contestReference;
     
-    private CMAMutation(Random rnd){
+    private CMAMutation(Random rnd, player11 contestReference){
         this.rnd = rnd;
+        this.contestReference = contestReference;
     }
 
     @Override
     /**
      * implement the CMA Algorithm
      */
-    public Individual mutate(Individual individual) {
+    public Individual mutate(double[] dna) {
         this.individual = individual;
         // TODO Auto-generated method stub
         //see ch04.pdf, p. 25
-        return null;
+        return contestReference.createIndividual(dna);
     }
     
     public double calculate_c_covarianceValue(int i_index, int j_index){

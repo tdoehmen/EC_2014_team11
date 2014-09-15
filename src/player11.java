@@ -58,14 +58,18 @@ public class player11 implements ContestSubmission {
         while(evals < EVALUATIONS_LIMIT){
             
             //TODO: avoid that same parent is chosen in different parent pairs?
+            ArrayList<Individual> children = new ArrayList<Individual>();
+            parentSelection.prepareSelection(population);
             for(int i = 0; i< NUMBER_OF_PARENT_PAIRS; i++){
                 Individual[] parents = parentSelection.selectParents(population);
             
-                ArrayList<Individual> children = recombination.crossover(parents[0], parents[1], NUMBER_OF_CHILDREN);
-                population.addIndividuals(children);
+                ArrayList<double[]> child_dnas = recombination.crossover(parents, NUMBER_OF_CHILDREN);
+                for(double[] child_dna: child_dnas){
+                    children.add(mutation.mutate(child_dna));
+                }
             }
             
-            survivalSelection.selectSurvivals(population);
+            survivalSelection.selectSurvivals(population,children);
             
             int generation = population.increaseGeneration();
             System.out.println("Generation "+generation+" Result: "+population.getIndividuals().get(population.getIndividuals().size()-1));
@@ -97,15 +101,15 @@ public class player11 implements ContestSubmission {
 		// Double score = (Double)evaluation_.evaluate(pred);
 	}
 	
-	public Double evluateFitness(double[] dna){
+	public Individual createIndividual(double[] dna){
 	    Double fitness = (Double) evaluation.evaluate(dna);
         evals++;
         if( fitness == null ){
             finalMessage("Maximum evaluations were reached.");
-            return 0.0;
+            return null;
         }
         
-        return fitness;
+        return new Individual(dna, fitness, population.getGeneration()+1);
 	}
 	
 	public void finalMessage(String message){
@@ -149,10 +153,10 @@ public class player11 implements ContestSubmission {
             //Do sth else
         }
 
-        initialPopulation = new DefaultInitialPopulation(rnd, evaluation, this);
+        initialPopulation = new DefaultInitialPopulation(rnd, this);
         parentSelection = new RouletteWheelParentSelection(rnd);
-        recombination = new BiPolarBlendCrossover(rnd, evaluation, this);
-        mutation = new CorrelatedMutation(rnd);
+        recombination = new BiPolarBlendCrossover(rnd, this);
+        mutation = new UncorrelatedMutation(rnd, this);
         survivalSelection = new FitnessAndAgeBasedSurvivalSelection();
 		
 	}

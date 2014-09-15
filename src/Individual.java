@@ -8,10 +8,11 @@ public class Individual implements Comparable{
     private Double fitness = null;
     private int generation;
     
-    public Individual(double[] dna, Double fitness) {
+    public Individual(double[] dna, Double fitness, int generation) {
         super();
         this.dna = dna;
         this.fitness = fitness;
+        this.generation = generation;
         sigma_mutation_step_sizes = new double[dna.length];
         alpha_correlation_parameters = new double[(dna.length*(dna.length-1))/2];
     }
