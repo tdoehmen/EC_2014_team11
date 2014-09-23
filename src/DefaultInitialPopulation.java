@@ -1,6 +1,3 @@
-import java.util.Random;
-
-import org.vu.contest.ContestEvaluation;
 
 
 public class DefaultInitialPopulation implements IInitialPopulation {

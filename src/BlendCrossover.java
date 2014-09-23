@@ -4,7 +4,7 @@ import java.util.Random;
 import org.vu.contest.ContestEvaluation;
 
 
-public class BiPolarBlendCrossover implements IRecombination {
+public class BlendCrossover implements IRecombination {
 
     public static double APLPHA_CROSS_RATE = 0.5;
     
@@ -34,12 +34,8 @@ public class BiPolarBlendCrossover implements IRecombination {
     private double[] blendCross(Individual parentOne, Individual parentTwo){
         double[] child_dna = new double[10];
         for(int j = 0; j<10; j++){
-            double di_delta = parentOne.getDna()[j]-parentTwo.getDna()[j];
-            if(di_delta > 0){
-                child_dna[j] = parentOne.getDna()[j]+(player11.rnd.nextDouble()*(2.0*di_delta)-(di_delta));
-            }else{
-                child_dna[j] = parentTwo.getDna()[j];
-            }
+            double di_delta = Math.abs(parentOne.getDna()[j]-parentTwo.getDna()[j]);
+            child_dna[j] = parentOne.getDna()[j]+(player11.rnd.nextDouble()*(2.0*di_delta)-(di_delta));
         }
         
         //create individual
