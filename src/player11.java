@@ -65,10 +65,14 @@ public class player11 implements ContestSubmission {
 	            for(int i = 0; i< NUMBER_OF_PARENT_PAIRS; i++){
 	                Individual[] parents = parentSelection.selectParents(population);
 	            
-	                ArrayList<double[]> child_dnas = recombination.crossover(parents, NUMBER_OF_CHILDREN);
-	                for(double[] child_dna: child_dnas){
-	                    children.add(mutation.mutate(child_dna));
+	                ArrayList<Individual> unmutated_children = recombination.crossover(parents, NUMBER_OF_CHILDREN);
+	                for(Individual child: unmutated_children){
+	                    mutation.mutate(child);
+	                    evaluateChild(child);
+	                    children.add(child);
+	                    
 	                }
+	                
 	            }
 	            
 	            survivalSelection.selectSurvivals(population,children);
@@ -117,6 +121,28 @@ public class player11 implements ContestSubmission {
 	        return null;
 	    }
 	}
+	
+	public static Individual createAndEvaluateIndividual(double[] dna){
+	       Double fitness = (Double) evaluation.evaluate(dna);
+	        evals++;
+	        if( fitness == null ){
+	            throw new RuntimeException("Maximum evaluations were reached.");
+	        }
+	        
+	        return new Individual(dna, fitness, null);
+	    }
+	    
+    public static void evaluateChild(Individual ind) {
+        Double fitness = (Double) evaluation.evaluate(ind.getDna());
+        evals++;
+        if( fitness == null ){
+            throw new RuntimeException("Maximum evaluations were reached.");
+        }
+        
+        ind.setFitness(fitness);
+        ind.setGeneration(population.getGeneration() + 1);
+    }
+
 	
 	public static Individual createIndividual(double[] dna){
 	    Double value = (Double) evaluation.evaluate(dna);
@@ -183,10 +209,11 @@ public class player11 implements ContestSubmission {
 
         population = new Population();
         fitnessCalculation = new DefaultFitness();
-        initialPopulation = new DefaultInitialPopulation();
-        parentSelection = new RouletteWheelParentSelection();
-        recombination = new BlendCrossover();
         mutation = new UncorrelatedMutation();
+        recombination = new BlendCrossover(mutation);
+        mutation.setRecombination(recombination);
+        initialPopulation = new DefaultInitialPopulation(mutation);
+        parentSelection = new RouletteWheelParentSelection();
         survivalSelection = new FitnessAndAgeBasedSurvivalSelection();
 		
 	}

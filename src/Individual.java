@@ -6,9 +6,9 @@ public class Individual implements Comparable<Individual>{
     private double[] sigma_mutation_step_sizes = null;
     private double[] alpha_correlation_parameters = null;
     private Double fitness = null;
-    private int generation;
+    private Integer generation = null;
     
-    public Individual(double[] dna, Double fitness, int generation) {
+    public Individual(double[] dna, Double fitness, Integer generation) {
         super();
         this.dna = dna;
         this.fitness = fitness;
@@ -33,10 +33,10 @@ public class Individual implements Comparable<Individual>{
         this.fitness = fitness;
     }
     
-    public int getGeneration() {
+    public Integer getGeneration() {
         return generation;
     }
-    public void setGeneration(int generation) {
+    public void setGeneration(Integer generation) {
         this.generation = generation;
     }
     
